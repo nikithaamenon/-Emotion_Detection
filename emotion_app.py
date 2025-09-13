@@ -25,14 +25,13 @@ while True:
             landmarks = face_landmarks.landmark
             h, w, _ = frame.shape
 
-            # Eye corner landmarks for scaling
+            # Eye distance for normalization
             left_eye_outer = landmarks[33]
             right_eye_outer = landmarks[263]
             lx = int(left_eye_outer.x * w)
             ly = int(left_eye_outer.y * h)
             rx = int(right_eye_outer.x * w)
             ry = int(right_eye_outer.y * h)
-
             eye_distance = ((rx - lx) ** 2 + (ry - ly) ** 2) ** 0.5
 
             # Mouth landmarks
@@ -47,7 +46,7 @@ while True:
             norm_mouth_width = mouth_width / eye_distance
             norm_mouth_open = mouth_open / eye_distance
 
-            # Eyebrows and eyes (for emotion fallback)
+            # Eyebrows and eyes for angry
             left_eyebrow = landmarks[65]
             left_eye = landmarks[159]
             right_eyebrow = landmarks[295]
@@ -61,24 +60,26 @@ while True:
             left_diff = le_eye_y - le_eyebrow_y
             right_diff = re_eye_y - re_eyebrow_y
 
-            # Emotion detection using normalized values
-            if norm_mouth_width > 1.8 and norm_mouth_open > 0.6:
-                emotion = "Happy 😊"
-            elif norm_mouth_open > 0.9:
-                emotion = "Surprised 😲"
-            elif norm_mouth_open < 0.3 and norm_mouth_width > 1.6:
-                emotion = "Neutral 😐"
-            else:
-                if left_diff < 10 and right_diff < 10:
-                    emotion = "Angry 😠"
-                elif abs(left_diff - right_diff) > 10:
-                    emotion = "Curious 🤨"
-                elif left_diff > 15 and right_diff > 15:
-                    emotion = "Sad 😢"
-                else:
-                    emotion = "Confused 🤔"
+            # Face tilt for confused
+            left_cheek = landmarks[234]
+            right_cheek = landmarks[454]
+            left_cheek_y = int(left_cheek.y * h)
+            right_cheek_y = int(right_cheek.y * h)
+            face_tilt = abs(left_cheek_y - right_cheek_y)
 
-            # Drawing landmarks for reference
+            # Emotion detection
+            if norm_mouth_open > 23 / eye_distance:
+                emotion = "Surprised 😲"
+            elif left_diff < 10 and right_diff < 10:
+                emotion = "Angry 😠"
+            elif 0.70 <= norm_mouth_width <= 0.75 and 0.14 <= norm_mouth_open <= 0.17:
+                emotion = "Happy 😊"
+            elif left_diff > 15 and right_diff > 15:
+                emotion = "Sad 😢"
+            elif face_tilt > 10:
+                emotion = "Confused 🤔"
+
+            # Draw landmarks
             cv2.circle(frame, ml, 3, (0, 255, 0), -1)
             cv2.circle(frame, mr, 3, (0, 255, 0), -1)
             cv2.circle(frame, ul, 3, (0, 0, 255), -1)
@@ -88,21 +89,23 @@ while True:
 
             mp_drawing.draw_landmarks(frame, face_landmarks, mp_face_mesh.FACEMESH_CONTOURS)
 
-            # Display values and emotion
-            cv2.putText(frame, f'Mouth Width: {round(norm_mouth_width, 2)}', (10, 30),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
-            cv2.putText(frame, f'Mouth Open: {round(norm_mouth_open, 2)}', (10, 60),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+            # Display values
+            cv2.putText(frame, f'Mouth Width: {round(norm_mouth_width,2)}', (10,30),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255,255,255),2)
+            cv2.putText(frame, f'Mouth Open: {round(norm_mouth_open,2)}', (10,60),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255,255,255),2)
 
     # Show emotion
     cv2.putText(frame, f'Emotion: {emotion}', (10, 90),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
+                cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0,255,255),2)
 
     # Show window
-    cv2.imshow("Live Emotion Detection (Normalized)", frame)
+    cv2.imshow("Live Emotion Detection", frame)
 
     if cv2.waitKey(1) == ord('q'):
         break
 
 cap.release()
 cv2.destroyAllWindows()
+
+
