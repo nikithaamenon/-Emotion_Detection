@@ -1,6 +1,6 @@
 # 🎭 Real-Time Emotion Detection using OpenCV & MediaPipe
 
-A lightweight, real-time emotion detection system using **OpenCV** and **MediaPipe**, designed to classify facial expressions like 😊 Happy, 😢 Sad, 😠 Angry, 😲 Surprised, and 😐 Neutral—without using any machine learning or deep learning models. It works by analyzing the geometry of facial landmarks from a webcam feed using simple rules.
+A lightweight, real-time emotion detection system using **OpenCV** and **MediaPipe**, designed to classify facial expressions like 😊 Happy, 😢 Sad, 😠 Angry, 😲 Surprised, and without using any machine learning or deep learning models. It works by analyzing the geometry of facial landmarks from a webcam feed using simple rules.
 
 ---
 
@@ -31,7 +31,7 @@ A lightweight, real-time emotion detection system using **OpenCV** and **MediaPi
    - 😢 **Sad** → Downturned lips + relaxed eyes  
    - 😠 **Angry** → Tight lips + furrowed brows  
    - 😲 **Surprised** → Raised brows + wide eyes  
-   - 😐 **Neutral** → Default face with no strong expressions  
+   
 
 ---
 
